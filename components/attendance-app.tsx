@@ -22,6 +22,7 @@ export function AttendanceApp() {
   const [records, setRecords] = useState<AttendanceRecord[]>([])
   const [showSuccess, setShowSuccess] = useState(false)
   const [lastSubmitted, setLastSubmitted] = useState<string>("")
+  const [lastSubmittedRowNumber, setLastSubmittedRowNumber] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -68,10 +69,19 @@ export function AttendanceApp() {
         date: record.date,
       })
 
-      if (result.success) {
+      if (result.success && result.data) {
         setLastSubmitted(record.name)
+        // Get rowNumber directly from the create response
+        const data = result.data as { rowNumber?: number }
+        console.log('[DEBUG] Create response data:', result.data)
+        console.log('[DEBUG] Extracted rowNumber:', data.rowNumber)
+        if (data.rowNumber) {
+          setLastSubmittedRowNumber(data.rowNumber)
+        } else {
+          console.warn('[DEBUG] No rowNumber in create response!')
+        }
         setShowSuccess(true)
-        // Refresh the list to get the new record with proper rowNumber
+        // Refresh the list to show the new record
         await fetchRecords()
       } else {
         setError(result.error || 'Failed to submit attendance')
@@ -110,6 +120,37 @@ export function AttendanceApp() {
     )
   }
 
+  const handleSuccessClose = async (feedback?: string) => {
+    console.log('[DEBUG] handleSuccessClose called')
+    console.log('[DEBUG] feedback:', feedback)
+    console.log('[DEBUG] lastSubmittedRowNumber:', lastSubmittedRowNumber)
+
+    // If feedback was provided and we have a row number, save it FIRST
+    if (feedback && lastSubmittedRowNumber) {
+      console.log('[DEBUG] Calling updateFeedback API...')
+      try {
+        const result = await attendanceAPI.updateFeedback(lastSubmittedRowNumber, feedback)
+        console.log('[DEBUG] updateFeedback response:', result)
+        if (!result.success) {
+          console.error('Failed to save feedback:', result.error)
+          setError('Failed to save feedback. Please try again.')
+          return // Don't close modal if feedback save failed
+        }
+        console.log('[DEBUG] Feedback saved successfully!')
+      } catch (err) {
+        console.error('Error saving feedback:', err)
+        setError('Failed to save feedback. Please try again.')
+        return // Don't close modal if feedback save failed
+      }
+    } else {
+      console.log('[DEBUG] Skipping feedback update - feedback:', !!feedback, 'rowNumber:', !!lastSubmittedRowNumber)
+    }
+
+    // Only close modal after feedback is successfully saved
+    setShowSuccess(false)
+    setLastSubmittedRowNumber(null)
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -124,7 +165,7 @@ export function AttendanceApp() {
           <AttendanceList records={records} onDelete={handleDelete} onRefresh={fetchRecords} />
         </div>
       </div>
-      <SuccessModal isOpen={showSuccess} onClose={() => setShowSuccess(false)} name={lastSubmitted} />
+      <SuccessModal isOpen={showSuccess} onClose={handleSuccessClose} name={lastSubmitted} />
     </main>
   )
 }

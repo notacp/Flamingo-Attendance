@@ -9,6 +9,7 @@ export interface AttendanceRecordAPI {
   batch: string;
   date: string;
   timestamp?: string;
+  feedback?: string;
 }
 
 export interface APIResponse<T = unknown> {
@@ -101,6 +102,28 @@ export const attendanceAPI = {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delete record',
+      };
+    }
+  },
+
+  /**
+   * UPDATE feedback for a record by row number
+   */
+  async updateFeedback(rowNumber: number, feedback: string): Promise<APIResponse> {
+    console.log('[DEBUG API] updateFeedback called with:', { rowNumber, feedback });
+    try {
+      const payload = { action: 'updateFeedback', rowNumber, feedback };
+      console.log('[DEBUG API] Sending payload:', payload);
+      const res = await postToAppsScript(payload);
+      console.log('[DEBUG API] Response status:', res.status);
+      const data = await res.json();
+      console.log('[DEBUG API] Response data:', data);
+      return data;
+    } catch (error) {
+      console.error('Failed to update feedback:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update feedback',
       };
     }
   },
