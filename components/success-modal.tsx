@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -26,7 +26,10 @@ const LOGO_URL = "/logo-icon.png"
 export function SuccessModal({ isOpen, onClose, name }: SuccessModalProps) {
   const [feedback, setFeedback] = useState("")
   const [isSaving, setIsSaving] = useState(false)
-  const quote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
+  const quote = useMemo(
+    () => motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)],
+    [isOpen]
+  )
 
   const handleClose = async () => {
     setIsSaving(true)
