@@ -1,23 +1,20 @@
 import Image from "next/image"
 
-const LOGO_URL = "/images/screenshot-202025-11-30-20at-205.png"
+const LOGO_URL = "/logo.png"
 
 export function Header() {
   return (
-    <header className="border-b border-border bg-card shadow-sm">
-      <div className="container mx-auto px-4 py-5">
-        <div className="flex items-center justify-center gap-4">
+    <header className="border-b border-border bg-white shadow-sm">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-center">
           <Image
-            src={LOGO_URL || "/placeholder.svg"}
-            alt="Flamingo Jiu-Jitsu Logo"
-            width={60}
-            height={60}
-            className="object-contain"
+            src={LOGO_URL}
+            alt="Flamingo Jiu-Jitsu"
+            width={400}
+            height={120}
+            className="object-contain h-24 w-auto"
+            priority
           />
-          <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-primary">Flamingo Jiu-Jitsu</h1>
-            <p className="text-sm text-muted-foreground tracking-wide">Attendance Check-In</p>
-          </div>
         </div>
       </div>
     </header>

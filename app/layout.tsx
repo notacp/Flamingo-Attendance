@@ -4,12 +4,22 @@ import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-import { Geist_Mono, Acme as V0_Font_Acme, Geist_Mono as V0_Font_Geist_Mono, Lora as V0_Font_Lora } from 'next/font/google'
+import { Poppins, Atkinson_Hyperlegible } from 'next/font/google'
 
 // Initialize fonts
-const _acme = V0_Font_Acme({ subsets: ['latin'], weight: ["400"] })
-const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200","300","400","500","600","700","800","900"] })
-const _lora = V0_Font_Lora({ subsets: ['latin'], weight: ["400","500","600","700"] })
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: '--font-poppins',
+  display: 'swap',
+})
+
+const atkinson = Atkinson_Hyperlegible({
+  subsets: ['latin'],
+  weight: ["400", "700"],
+  variable: '--font-atkinson',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: "Dojo Check-In | Jiu Jitsu Attendance",
@@ -18,7 +28,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#1a1a2e",
+  themeColor: "#FC0000",
 }
 
 export default function RootLayout({
@@ -28,7 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`${poppins.variable} ${atkinson.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

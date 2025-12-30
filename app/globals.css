@@ -4,45 +4,68 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Flamingo Jiu-Jitsu coral/red-orange theme */
-  --background: oklch(0.98 0.005 30);
-  --foreground: oklch(0.15 0.01 30);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 30);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 30);
-  --primary: oklch(0.58 0.2 25);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.02 25);
-  --secondary-foreground: oklch(0.25 0.01 30);
-  --muted: oklch(0.92 0.01 30);
-  --muted-foreground: oklch(0.45 0.01 30);
-  --accent: oklch(0.65 0.18 25);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.88 0.02 25);
-  --input: oklch(0.96 0.01 30);
-  --ring: oklch(0.58 0.2 25);
-  --chart-1: oklch(0.58 0.2 25);
-  --chart-2: oklch(0.65 0.18 25);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Flamingo Jiu-Jitsu Theme */
+  /* Flare Red: #FC0000 */
+  /* Deep Black: #161313 */
+  /* Soft Pink: #F4E4E4 */
+  /* Teal: #127475 - #0F9594 */
+
+  --background: #F4E4E4;
+  --foreground: #161313;
+
+  --card: #ffffff;
+  --card-foreground: #161313;
+
+  --popover: #ffffff;
+  --popover-foreground: #161313;
+
+  --primary: #FC0000;
+  --primary-foreground: #ffffff;
+
+  --secondary: #127475;
+  --secondary-foreground: #ffffff;
+
+  --muted: #eadddd;
+  --muted-foreground: #6b6b6b;
+
+  --accent: #0F9594;
+  --accent-foreground: #ffffff;
+
+  --destructive: #990000;
+  --destructive-foreground: #ffffff;
+
+  --border: #e6cece;
+  --input: #e6cece;
+  --ring: #FC0000;
+
   --radius: 0.75rem;
-  --sidebar: oklch(0.15 0.01 250);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.58 0.2 25);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.25 0.01 250);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.3 0.01 250);
-  --sidebar-ring: oklch(0.58 0.2 25);
+
+  /* Chart colors - tentative adaptation based on brand */
+  --chart-1: #FC0000;
+  /* Flare Red */
+  --chart-2: #127475;
+  /* Teal */
+  --chart-3: #161313;
+  /* Deep Black */
+  --chart-4: #0F9594;
+  /* Aqua Teal */
+  --chart-5: #F4E4E4;
+  /* Soft Pink */
+
+  --sidebar: #161313;
+  --sidebar-foreground: #F4E4E4;
+  --sidebar-primary: #FC0000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #F4E4E4;
+  --sidebar-border: #333333;
+  --sidebar-ring: #FC0000;
 }
 
 @theme inline {
-  --font-sans: 'Acme', 'Acme Fallback';
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: var(--font-atkinson), 'sans-serif';
+  --font-heading: var(--font-poppins), 'sans-serif';
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -79,13 +102,23 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-serif: 'Lora', 'Lora Fallback';}
+}
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
   }
 }
