@@ -3,14 +3,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { ClipboardList, User, Clock } from "lucide-react"
+import { ClipboardList, User, Clock, Trash2, RefreshCw } from "lucide-react"
 import type { AttendanceRecord } from "./attendance-app"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 interface AttendanceListProps {
   records: AttendanceRecord[]
+  onDelete?: (rowNumber: number) => void | Promise<void>
+  onRefresh?: () => void | Promise<void>
 }
 
-export function AttendanceList({ records }: AttendanceListProps) {
+export function AttendanceList({ records, onDelete, onRefresh }: AttendanceListProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       weekday: "short",
@@ -36,9 +42,26 @@ export function AttendanceList({ records }: AttendanceListProps) {
             <ClipboardList className="w-5 h-5 text-primary" />
             Today's Warriors
           </span>
-          <Badge variant="secondary" className="bg-primary/10 text-primary border border-primary/20">
-            {records.length} checked in
-          </Badge>
+          <div className="flex items-center gap-2">
+            {onRefresh && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={async () => {
+                  setRefreshing(true)
+                  await onRefresh()
+                  setRefreshing(false)
+                }}
+                disabled={refreshing}
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </Button>
+            )}
+            <Badge variant="secondary" className="bg-primary/10 text-primary border border-primary/20">
+              {records.length} checked in
+            </Badge>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -72,6 +95,23 @@ export function AttendanceList({ records }: AttendanceListProps) {
                       </span>
                     </div>
                   </div>
+                  {onDelete && record.rowNumber && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={async () => {
+                        if (record.rowNumber) {
+                          setDeletingId(record.id)
+                          await onDelete(record.rowNumber)
+                          setDeletingId(null)
+                        }
+                      }}
+                      disabled={deletingId === record.id}
+                    >
+                      <Trash2 className={`w-4 h-4 ${deletingId === record.id ? 'animate-pulse' : ''}`} />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

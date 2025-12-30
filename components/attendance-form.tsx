@@ -12,7 +12,8 @@ import { UserCheck, Calendar, Users, Mail } from "lucide-react"
 import type { AttendanceRecord } from "./attendance-app"
 
 interface AttendanceFormProps {
-  onSubmit: (record: Omit<AttendanceRecord, "id" | "timestamp">) => void
+  onSubmit: (record: Omit<AttendanceRecord, "id" | "timestamp">) => void | Promise<void>
+  isSubmitting?: boolean
 }
 
 const batches = [
@@ -131,7 +132,7 @@ function formatDateForDisplay(isoDate: string) {
   })
 }
 
-export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
+export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFormProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [batch, setBatch] = useState("")
@@ -257,9 +258,10 @@ export function AttendanceForm({ onSubmit }: AttendanceFormProps) {
 
           <Button
             type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+            disabled={isSubmitting}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 text-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Mark Attendance
+            {isSubmitting ? 'Submitting...' : 'Mark Attendance'}
           </Button>
         </form>
       </CardContent>
