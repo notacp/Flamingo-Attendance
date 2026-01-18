@@ -8,6 +8,11 @@ import { SuccessModal } from "./success-modal"
 import { attendanceAPI, type AttendanceRecordAPI } from "@/lib/api"
 import { Loader2 } from "lucide-react"
 
+// Helper to get today's date in ISO format (YYYY-MM-DD)
+function getTodayISO() {
+  return new Date().toISOString().split("T")[0]
+}
+
 export interface AttendanceRecord {
   id: string
   rowNumber?: number
@@ -149,7 +154,7 @@ export function AttendanceApp() {
         )}
         <div className="grid gap-8 md:grid-cols-2">
           <AttendanceForm onSubmit={handleSubmit} isSubmitting={submitting} />
-          <AttendanceList records={records} onRefresh={fetchRecords} />
+          <AttendanceList records={records.filter(r => r.date === getTodayISO())} onRefresh={fetchRecords} />
         </div>
       </div>
       <SuccessModal isOpen={showSuccess} onClose={handleSuccessClose} name={lastSubmitted} />
