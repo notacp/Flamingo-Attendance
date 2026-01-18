@@ -93,19 +93,6 @@ export function AttendanceApp() {
     }
   }
 
-  const handleDelete = async (rowNumber: number) => {
-    try {
-      const result = await attendanceAPI.delete(rowNumber)
-      if (result.success) {
-        await fetchRecords()
-      } else {
-        setError(result.error || 'Failed to delete record')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-    }
-  }
-
   if (loading) {
     return (
       <main className="min-h-screen bg-background">
@@ -162,7 +149,7 @@ export function AttendanceApp() {
         )}
         <div className="grid gap-8 md:grid-cols-2">
           <AttendanceForm onSubmit={handleSubmit} isSubmitting={submitting} />
-          <AttendanceList records={records} onDelete={handleDelete} onRefresh={fetchRecords} />
+          <AttendanceList records={records} onRefresh={fetchRecords} />
         </div>
       </div>
       <SuccessModal isOpen={showSuccess} onClose={handleSuccessClose} name={lastSubmitted} />

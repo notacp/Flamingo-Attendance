@@ -3,19 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { ClipboardList, User, Clock, Trash2, RefreshCw } from "lucide-react"
+import { ClipboardList, User, Clock, RefreshCw } from "lucide-react"
 import type { AttendanceRecord } from "./attendance-app"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
 interface AttendanceListProps {
   records: AttendanceRecord[]
-  onDelete?: (rowNumber: number) => void | Promise<void>
   onRefresh?: () => void | Promise<void>
 }
 
-export function AttendanceList({ records, onDelete, onRefresh }: AttendanceListProps) {
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+export function AttendanceList({ records, onRefresh }: AttendanceListProps) {
   const [refreshing, setRefreshing] = useState(false)
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -95,23 +93,6 @@ export function AttendanceList({ records, onDelete, onRefresh }: AttendanceListP
                       </span>
                     </div>
                   </div>
-                  {onDelete && record.rowNumber && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={async () => {
-                        if (record.rowNumber) {
-                          setDeletingId(record.id)
-                          await onDelete(record.rowNumber)
-                          setDeletingId(null)
-                        }
-                      }}
-                      disabled={deletingId === record.id}
-                    >
-                      <Trash2 className={`w-4 h-4 ${deletingId === record.id ? 'animate-pulse' : ''}`} />
-                    </Button>
-                  )}
                 </div>
               ))}
             </div>
