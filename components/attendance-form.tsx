@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -141,23 +141,34 @@ export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFor
     batchId: "",
     status: "none",
   })
+  const userManuallyChangedBatch = useRef(false)
 
+  // Initial auto-selection on mount
   useEffect(() => {
     const detected = suggestBatch()
     setSuggestion(detected)
     setBatch(detected.batchId)
+  }, [])
 
+  // Periodic update every minute
+  useEffect(() => {
     const interval = setInterval(() => {
       const newDetected = suggestBatch()
       setSuggestion(newDetected)
       // Only auto-update if user hasn't manually changed the batch
-      if (batch === suggestion.batchId || batch === "") {
+      if (!userManuallyChangedBatch.current) {
         setBatch(newDetected.batchId)
       }
     }, 60000)
 
     return () => clearInterval(interval)
   }, [])
+
+  // Handle user manually changing batch
+  const handleBatchChange = (newBatch: string) => {
+    userManuallyChangedBatch.current = true
+    setBatch(newBatch)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -167,6 +178,8 @@ export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFor
     onSubmit({ name, email, batch: selectedBatch?.label || batch, date })
     setName("")
     setEmail("")
+    // Reset to suggested batch after submission
+    userManuallyChangedBatch.current = false
     setBatch(suggestion.batchId)
     setDate(getTodayISO())
   }
@@ -237,7 +250,7 @@ export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFor
                 </span>
               )}
             </Label>
-            <Select value={batch} onValueChange={setBatch} required>
+            <Select value={batch} onValueChange={handleBatchChange} required>
               <SelectTrigger className="bg-input border-border text-foreground">
                 <SelectValue placeholder="Choose your batch" />
               </SelectTrigger>
