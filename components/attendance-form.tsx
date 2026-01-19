@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserCheck, Calendar, Users, Mail } from "lucide-react"
 import type { AttendanceRecord } from "./attendance-app"
+import { getTodayISO, formatDateForDisplay } from "@/lib/date-utils"
 
 interface AttendanceFormProps {
   onSubmit: (record: Omit<AttendanceRecord, "id" | "timestamp">) => void | Promise<void>
@@ -101,36 +102,6 @@ function getSuggestionMessage(batchId: string, status: "current" | "upcoming" | 
   }
 }
 
-function getTodayFormatted() {
-  return new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
-function getCurrentTime() {
-  return new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  })
-}
-
-function getTodayISO() {
-  return new Date().toISOString().split("T")[0]
-}
-
-function formatDateForDisplay(isoDate: string) {
-  const date = new Date(isoDate + "T00:00:00")
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
 
 export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFormProps) {
   const [name, setName] = useState("")

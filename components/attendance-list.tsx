@@ -8,6 +8,8 @@ import type { AttendanceRecord } from "./attendance-app"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
+import { formatDateForDisplay } from "@/lib/date-utils"
+
 interface AttendanceListProps {
   records: AttendanceRecord[]
   onRefresh?: () => void | Promise<void>
@@ -15,13 +17,7 @@ interface AttendanceListProps {
 
 export function AttendanceList({ records, onRefresh }: AttendanceListProps) {
   const [refreshing, setRefreshing] = useState(false)
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    })
-  }
+
 
   const getBatchColor = (batch: string) => {
     if (batch.includes("Morning")) return "bg-primary text-primary-foreground"
@@ -89,7 +85,7 @@ export function AttendanceList({ records, onRefresh }: AttendanceListProps) {
                       </Badge>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {formatDate(record.date)}
+                        {formatDateForDisplay(record.date)}
                       </span>
                     </div>
                   </div>

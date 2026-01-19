@@ -8,10 +8,7 @@ import { SuccessModal } from "./success-modal"
 import { attendanceAPI, type AttendanceRecordAPI } from "@/lib/api"
 import { Loader2 } from "lucide-react"
 
-// Helper to get today's date in ISO format (YYYY-MM-DD)
-function getTodayISO() {
-  return new Date().toISOString().split("T")[0]
-}
+import { getTodayISO, normalizeDate } from "@/lib/date-utils"
 
 export interface AttendanceRecord {
   id: string
@@ -38,15 +35,19 @@ export function AttendanceApp() {
       const result = await attendanceAPI.getAll()
       if (result.success && result.data) {
         // Transform API records to local format
-        const transformedRecords: AttendanceRecord[] = result.data.map((record, index) => ({
-          id: record.rowNumber?.toString() || index.toString(),
-          rowNumber: record.rowNumber,
-          name: record.name,
-          email: record.email,
-          batch: record.batch,
-          date: record.date,
-          timestamp: record.timestamp ? new Date(record.timestamp).getTime() : Date.now(),
-        }))
+        // Use 'any' cast to handle potential case variation in API keys (e.g. 'Date' vs 'date')
+        const transformedRecords: AttendanceRecord[] = result.data.map((r, index) => {
+          const record = r as any;
+          return {
+            id: record.rowNumber?.toString() || index.toString(),
+            rowNumber: record.rowNumber,
+            name: record.name || record.Name,
+            email: record.email || record.Email,
+            batch: record.batch || record.Batch,
+            date: normalizeDate(record.date || record.Date || ''),
+            timestamp: record.timestamp ? new Date(record.timestamp).getTime() : Date.now(),
+          };
+        })
         setRecords(transformedRecords)
       } else {
         setError(result.error || 'Failed to fetch records')
@@ -154,10 +155,16 @@ export function AttendanceApp() {
         )}
         <div className="grid gap-8 md:grid-cols-2">
           <AttendanceForm onSubmit={handleSubmit} isSubmitting={submitting} />
-          <AttendanceList records={records.filter(r => r.date === getTodayISO())} onRefresh={fetchRecords} />
+          <AttendanceList
+            records={(() => {
+              const today = getTodayISO();
+              return records.filter(r => r.date === today);
+            })()}
+            onRefresh={fetchRecords}
+          />
         </div>
       </div>
       <SuccessModal isOpen={showSuccess} onClose={handleSuccessClose} name={lastSubmitted} />
-    </main>
+    </main >
   )
 }

@@ -45,9 +45,15 @@ export const attendanceAPI = {
     }
 
     try {
-      const res = await fetch(API_URL, {
+      // Append timestamp to URL to prevent browser/network caching
+      // Check if URL already has params
+      const separator = API_URL.includes('?') ? '&' : '?';
+      const url = `${API_URL}${separator}t=${Date.now()}`;
+
+      const res = await fetch(url, {
         method: 'GET',
         redirect: 'follow',
+        cache: 'no-store',
       });
 
       if (!res.ok) {
