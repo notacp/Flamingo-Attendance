@@ -4,10 +4,14 @@ const API_URL = process.env.NEXT_PUBLIC_SHEETS_API_URL;
 
 export interface AttendanceRecordAPI {
   rowNumber?: number;
-  name: string;
-  email: string;
-  batch: string;
-  date: string;
+  name?: string;
+  Name?: string;
+  email?: string;
+  Email?: string;
+  batch?: string;
+  Batch?: string;
+  date?: string;
+  Date?: string;
   timestamp?: string;
   feedback?: string;
 }
@@ -21,7 +25,6 @@ export interface APIResponse<T = unknown> {
 
 /**
  * Helper function to make POST requests to Apps Script
- * Note: We DON'T set Content-Type header to avoid CORS preflight issues
  */
 async function postToAppsScript(payload: object): Promise<Response> {
   if (!API_URL) {
@@ -30,7 +33,7 @@ async function postToAppsScript(payload: object): Promise<Response> {
 
   return fetch(API_URL, {
     method: 'POST',
-    redirect: 'follow', // Apps Script may redirect
+    redirect: 'follow',
     body: JSON.stringify(payload),
   });
 }
@@ -45,8 +48,6 @@ export const attendanceAPI = {
     }
 
     try {
-      // Append timestamp to URL to prevent browser/network caching
-      // Check if URL already has params
       const separator = API_URL.includes('?') ? '&' : '?';
       const url = `${API_URL}${separator}t=${Date.now()}`;
 
@@ -63,7 +64,6 @@ export const attendanceAPI = {
       const data = await res.json();
       return data;
     } catch (error) {
-      console.error('Failed to fetch records:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch records',
@@ -87,7 +87,6 @@ export const attendanceAPI = {
       const data = await res.json();
       return data;
     } catch (error) {
-      console.error('Failed to create record:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create record',
@@ -104,7 +103,6 @@ export const attendanceAPI = {
       const data = await res.json();
       return data;
     } catch (error) {
-      console.error('Failed to delete record:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delete record',
@@ -116,17 +114,11 @@ export const attendanceAPI = {
    * UPDATE feedback for a record by row number
    */
   async updateFeedback(rowNumber: number, feedback: string): Promise<APIResponse> {
-    console.log('[DEBUG API] updateFeedback called with:', { rowNumber, feedback });
     try {
-      const payload = { action: 'updateFeedback', rowNumber, feedback };
-      console.log('[DEBUG API] Sending payload:', payload);
-      const res = await postToAppsScript(payload);
-      console.log('[DEBUG API] Response status:', res.status);
+      const res = await postToAppsScript({ action: 'updateFeedback', rowNumber, feedback });
       const data = await res.json();
-      console.log('[DEBUG API] Response data:', data);
       return data;
     } catch (error) {
-      console.error('Failed to update feedback:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update feedback',

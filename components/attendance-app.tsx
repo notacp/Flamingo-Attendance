@@ -34,20 +34,15 @@ export function AttendanceApp() {
       setError(null)
       const result = await attendanceAPI.getAll()
       if (result.success && result.data) {
-        // Transform API records to local format
-        // Use 'any' cast to handle potential case variation in API keys (e.g. 'Date' vs 'date')
-        const transformedRecords: AttendanceRecord[] = result.data.map((r, index) => {
-          const record = r as any;
-          return {
-            id: record.rowNumber?.toString() || index.toString(),
-            rowNumber: record.rowNumber,
-            name: record.name || record.Name,
-            email: record.email || record.Email,
-            batch: record.batch || record.Batch,
-            date: normalizeDate(record.date || record.Date || ''),
-            timestamp: record.timestamp ? new Date(record.timestamp).getTime() : Date.now(),
-          };
-        })
+        const transformedRecords: AttendanceRecord[] = result.data.map((record, index) => ({
+          id: record.rowNumber?.toString() || index.toString(),
+          rowNumber: record.rowNumber,
+          name: record.name || record.Name || 'Unknown',
+          email: record.email || record.Email || '',
+          batch: record.batch || record.Batch || '',
+          date: normalizeDate(record.date || record.Date || ''),
+          timestamp: record.timestamp ? new Date(record.timestamp).getTime() : Date.now(),
+        }))
         setRecords(transformedRecords)
       } else {
         setError(result.error || 'Failed to fetch records')
@@ -77,17 +72,11 @@ export function AttendanceApp() {
 
       if (result.success && result.data) {
         setLastSubmitted(record.name)
-        // Get rowNumber directly from the create response
         const data = result.data as { rowNumber?: number }
-        console.log('[DEBUG] Create response data:', result.data)
-        console.log('[DEBUG] Extracted rowNumber:', data.rowNumber)
         if (data.rowNumber) {
           setLastSubmittedRowNumber(data.rowNumber)
-        } else {
-          console.warn('[DEBUG] No rowNumber in create response!')
         }
         setShowSuccess(true)
-        // Refresh the list to show the new record
         await fetchRecords()
       } else {
         setError(result.error || 'Failed to submit attendance')
@@ -114,32 +103,19 @@ export function AttendanceApp() {
   }
 
   const handleSuccessClose = async (feedback?: string) => {
-    console.log('[DEBUG] handleSuccessClose called')
-    console.log('[DEBUG] feedback:', feedback)
-    console.log('[DEBUG] lastSubmittedRowNumber:', lastSubmittedRowNumber)
-
-    // If feedback was provided and we have a row number, save it FIRST
     if (feedback && lastSubmittedRowNumber) {
-      console.log('[DEBUG] Calling updateFeedback API...')
       try {
         const result = await attendanceAPI.updateFeedback(lastSubmittedRowNumber, feedback)
-        console.log('[DEBUG] updateFeedback response:', result)
         if (!result.success) {
-          console.error('Failed to save feedback:', result.error)
           setError('Failed to save feedback. Please try again.')
-          return // Don't close modal if feedback save failed
+          return
         }
-        console.log('[DEBUG] Feedback saved successfully!')
       } catch (err) {
-        console.error('Error saving feedback:', err)
         setError('Failed to save feedback. Please try again.')
-        return // Don't close modal if feedback save failed
+        return
       }
-    } else {
-      console.log('[DEBUG] Skipping feedback update - feedback:', !!feedback, 'rowNumber:', !!lastSubmittedRowNumber)
     }
 
-    // Only close modal after feedback is successfully saved
     setShowSuccess(false)
     setLastSubmittedRowNumber(null)
   }
