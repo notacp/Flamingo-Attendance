@@ -12,6 +12,36 @@ import { UserCheck, Calendar, Users, Mail } from "lucide-react"
 import type { AttendanceRecord } from "./attendance-app"
 import { getTodayISO, formatDateForDisplay } from "@/lib/date-utils"
 
+const USER_PREFS_KEY = "flamingo-attendance-user-prefs"
+
+interface UserPreferences {
+  name: string
+  email: string
+  preferredBatch: string
+}
+
+function loadUserPreferences(): UserPreferences | null {
+  if (typeof window === "undefined") return null
+  try {
+    const saved = localStorage.getItem(USER_PREFS_KEY)
+    if (saved) {
+      return JSON.parse(saved) as UserPreferences
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null
+}
+
+function saveUserPreferences(prefs: UserPreferences): void {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(USER_PREFS_KEY, JSON.stringify(prefs))
+  } catch {
+    // Ignore storage errors (e.g., quota exceeded)
+  }
+}
+
 interface AttendanceFormProps {
   onSubmit: (record: Omit<AttendanceRecord, "id" | "timestamp">) => void | Promise<void>
   isSubmitting?: boolean
@@ -114,11 +144,25 @@ export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFor
   })
   const userManuallyChangedBatch = useRef(false)
 
-  // Initial auto-selection on mount
+  // Load saved preferences and set initial batch on mount
   useEffect(() => {
+    const savedPrefs = loadUserPreferences()
+    if (savedPrefs) {
+      setName(savedPrefs.name)
+      setEmail(savedPrefs.email)
+      // Use saved batch preference if available, otherwise use smart suggestion
+      if (savedPrefs.preferredBatch) {
+        setBatch(savedPrefs.preferredBatch)
+        userManuallyChangedBatch.current = true // Treat saved preference like manual selection
+      }
+    }
+
     const detected = suggestBatch()
     setSuggestion(detected)
-    setBatch(detected.batchId)
+    // Only auto-set batch if no saved preference
+    if (!savedPrefs?.preferredBatch) {
+      setBatch(detected.batchId)
+    }
   }, [])
 
   // Periodic update every minute
@@ -145,10 +189,16 @@ export function AttendanceForm({ onSubmit, isSubmitting = false }: AttendanceFor
     e.preventDefault()
     if (!name || !email || !batch || !date) return
 
+    // Save user preferences for next time
+    saveUserPreferences({
+      name,
+      email,
+      preferredBatch: batch,
+    })
+
     const selectedBatch = batches.find((b) => b.id === batch)
     onSubmit({ name, email, batch: selectedBatch?.label || batch, date })
-    setName("")
-    setEmail("")
+    // Keep name and email populated for convenience (they're saved anyway)
     // Reset to suggested batch after submission
     userManuallyChangedBatch.current = false
     setBatch(suggestion.batchId)
